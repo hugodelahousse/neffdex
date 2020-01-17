@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.json",
+  "include": [
+    "src/**/*.ts",
+    "typings/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "build"
+  ],
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node"
+  }
+}

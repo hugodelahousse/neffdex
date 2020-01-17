@@ -1,0 +1,26 @@
+fragment AllStatistics on Pokemon {
+    statistics {
+        hp
+        attack
+        defense
+        spatk
+        spdef
+        speed
+    }
+}
+
+fragment PokemonDetails on Pokemon {
+    name
+    primaryType
+    secondaryType
+    sprite
+    weight
+    height
+    ...AllStatistics
+}
+
+query PokemonDetailQuery($dexNumber: Int!) {
+    pokemon(dexNumber: $dexNumber) {
+        ...PokemonDetails
+    }
+}

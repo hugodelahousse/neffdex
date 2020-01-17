@@ -1,0 +1,12 @@
+
+fragment PokemonListItem on Pokemon {
+    dexNumber
+    name
+    sprite
+}
+
+query PokemonListQuery {
+    pokemons {
+        ...PokemonListItem
+    }
+}

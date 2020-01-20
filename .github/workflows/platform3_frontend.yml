@@ -15,6 +15,13 @@ jobs:
     strategy:
       matrix:
         deployment: [PLATFORM3]
+        include:
+          - deployment: PLATFORM3
+            AWS_ACCESS_KEY_ID: PLATFORM3_AWS_ACCESS_KEY_ID
+            AWS_SECRET_ACCESS_KEY: PLATFORM3_AWS_SECRET_ACCESS_KEY
+            GRAPHQL_API_URL: PLATFORM3_GRAPHQL_API_URL
+            BUCKET_NAME: PLATFORM3_BUCKET_NAME
+
     
     steps:
     - name: Checkout
@@ -23,8 +30,8 @@ jobs:
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        aws-access-key-id: ${{ secrets.${{ matrix.deployment }}_AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.${{ matrix.deployment }}_AWS_SECRET_ACCESS_KEY }}
+        aws-access-key-id: ${{ secrets[matrix.AWS_ACCESS_KEY_ID] }}
+        aws-secret-access-key: ${{ secrets[matrix.AWS_SECRET_ACCESS_KEY] }}
         aws-region: eu-west-3
     
     - name: Setup Node.js for use with actions
@@ -48,12 +55,12 @@ jobs:
     - name: Build frontend
       working-directory: packages/web
       env:
-        GRAPHQL_API_URL: ${{ secrets.${{ matrix.deployment }}_GRAPHQL_API_URL }}
+        GRAPHQL_API_URL: ${{ secrets[matrix.GRAPHQL_API_URL] }}
       run: |
         yarn build:production
         
     - name: Deploy frontend to s3
       working-directory: packages/web
       env:
-        BUCKET_NAME: ${{ secrets.${{ matrix.deployment }}_BUCKET_NAME }}
+        BUCKET_NAME: ${{ secrets[matrix.BUCKET_NAME] }}
       run: aws s3 sync ./build/ s3://$BUCKET_NAME --delete

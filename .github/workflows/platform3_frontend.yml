@@ -38,15 +38,18 @@ jobs:
           ${{ runner.os }}-yarn-
     
     - name: Install dependencies
+      working-directory: packages/web
       run: yarn install
       
     - name: Build frontend
+      working-directory: packages/web
       env:
         GRAPHQL_API_URL: ${{ secrets.PLATFORM3_GRAPHQL_API_URL }}
       run: |
-        cd packages/web
         yarn build:production
+        
     - name: Deploy frontend to s3
+      working-directory: packages/web
       env:
         BUCKET_NAME: ${{ secrets.PLATFORM3_BUCKET_NAME }}
       run: aws s3 sync ./build/ s3://$BUCKET_NAME --delete

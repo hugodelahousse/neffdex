@@ -8,7 +8,7 @@ const common = require('./webpack.common.js');
 module.exports = merge(common, {
   devtool: 'source-map',
   entry: [path.join(__dirname, '..', 'src/graphql_handler.ts')],
-  externals: [nodeExternals({})],
+  externals: process.env.STANDALONE_BUILD ? [] : [nodeExternals({})],
   mode: 'production',
   plugins: [new CleanWebpackPlugin()],
   output: {

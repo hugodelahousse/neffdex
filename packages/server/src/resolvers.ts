@@ -1,4 +1,3 @@
-import {Item} from "dynamodb/Model";
 import { Pokemon } from './dynamo_models/Pokemon';
 import dynamoDB from "./dynamo";
 

@@ -1,0 +1,63 @@
+on:
+  check_run:
+    types: [requested_action]
+  push:
+    branches:
+      - master
+
+name: Deploy backend to platform 3
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.PLATFORM3_AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.PLATFORM3_AWS_SECRET_ACCESS_KEY }}
+        aws-region: eu-west-3
+    
+    - name: Setup Node.js for use with actions
+      uses: actions/setup-node@v1.1.0
+      
+    - name: Get yarn cache
+      id: yarn-cache
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+
+    - uses: actions/cache@v1
+      with:
+        path: ${{ steps.yarn-cache.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+    
+    - name: Install dependencies
+      working-directory: packages/server
+      run: yarn install
+      
+    - name: Build backend
+      working-directory: packages/server
+      env:
+        STANDALONE_BUILD: 1
+      run: |
+        yarn build:platform3
+        mv dist ../../dist
+
+    - name: Zip backend
+      uses: montudor/action-zip@v0.1.0
+      with:
+        args: zip -qq -r ./package.zip ./dist
+
+    - name: Upload package
+      env:
+        BUCKET_NAME: ${{ secrets.PLATFORM3_DEPLOYMENT_BUCKET }}
+        FUNCTION_NAME: ${{ secrets.PLATFORM3_FUNCTION_NAME }}
+      run: |
+        aws s3 cp package.zip s3://$BUCKET_NAME
+        aws lambda update-function-code --function-name $FUNCTION_NAME --s3-key package.zip --s3-bucket $BUCKET_NAME

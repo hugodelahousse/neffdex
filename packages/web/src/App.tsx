@@ -12,7 +12,7 @@ import {
 } from '@material-ui/core';
 
 import * as React from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { HashRouter as Router } from 'react-router-dom';
 import Routes from './router';
 
 const useStyles = makeStyles(theme => ({
@@ -23,7 +23,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const App = () => {
+export default function App() {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
   const theme = React.useMemo(
@@ -36,7 +36,7 @@ const App = () => {
     [prefersDarkMode]
   );
 
-  const classes = useStyles();
+  const classes = useStyles({});
 
   return (
     <ThemeProvider theme={theme}>
@@ -50,13 +50,12 @@ const App = () => {
       </AppBar>
       <Container>
         <Box my={2}>
-          <BrowserRouter>
+          <Router>
             <Routes />
-          </BrowserRouter>
+          </Router>
         </Box>
       </Container>
     </ThemeProvider>
   );
 };
 
-export default App;

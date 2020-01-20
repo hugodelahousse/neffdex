@@ -42,15 +42,13 @@ export default async (port: number): Promise<Server> => {
 
   apolloServer.applyMiddleware({ app, path: '/graphql' });
 
-  if (module.hot) {
-    app.use(
-      '/graphiql',
-      graphiqlExpress({
-        endpointURL: '/graphql',
-        subscriptionsEndpoint: `ws://localhost:${port}/subscriptions`,
-      })
-    );
-  }
+  app.use(
+    '/graphiql',
+    graphiqlExpress({
+      endpointURL: '/graphql',
+      subscriptionsEndpoint: `ws://localhost:${port}/subscriptions`,
+    })
+  );
 
   return new Promise<Server>(resolve => {
     server.listen(port, () => {

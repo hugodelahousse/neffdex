@@ -1,6 +1,8 @@
 from tqdm import tqdm
 import json
 import requests
+import requests_cache
+requests_cache.install_cache('/tmp/request_cache')
 
 
 def get_stat(pokemon, stat_name):
@@ -26,6 +28,18 @@ def normalize_data(pokemon):
         'ability_description': requests.get(pokemon['abilities'][0]['ability']['url']).json()['effect_entries'][0]['effect']
     }
 
+def aws_format(data):
+    def data_to_dict(value):
+        if value is None:
+            return {"NULL": True}
+        if isinstance(value, str):
+            return {'S': value}
+        elif isinstance(value, int) or isinstance(value, float):
+            return {'N': str(value)}
+        assert value, value
+
+    return {'PutRequest': {"Item": {k: data_to_dict(v) for k, v in data.items()} }}
+
 def main():
     pokemon_data = {}
     for i in tqdm(range(1, 152)):
@@ -33,7 +47,9 @@ def main():
         assert response.status_code == 200, response.url
         pokemon_data[i] = normalize_data(response.json())
 
-    print(json.dumps(pokemon_data))
+    for pokemon in pokemon_data.values():
+        with open(f'pokemon_data/{pokemon["name"]}.json', 'w') as f:
+            json.dump({"Pokemon": [aws_format(pokemon)]}, f, indent=4, ensure_ascii=False)
 
 
 if __name__ == "__main__":

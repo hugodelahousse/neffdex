@@ -27,7 +27,7 @@ const useStyles = makeStyles({
 });
 
 function PokemonTile({ pokemon }: { pokemon: PokemonListItemFragment }) {
-  const classes = useStyles();
+  const classes = useStyles({});
   return (
     <Link to={`${pokemon.dexNumber}`} style={{ textDecoration: 'none' }}>
       <Card>

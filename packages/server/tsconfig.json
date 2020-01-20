@@ -1,5 +1,4 @@
 {
-  "extends": "../../tsconfig.json",
   "include": [
     "src/**/*.ts",
     "typings/*.d.ts"
@@ -14,6 +13,12 @@
     "esModuleInterop": true,
     "suppressImplicitAnyIndexErrors": true,
     "allowSyntheticDefaultImports": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "lib": [
+      "es2015",
+      "dom",
+      "esnext"
+    ]
   }
 }

@@ -1,41 +1,9 @@
-import { Server } from 'http';
+import {ApolloServer} from 'apollo-server';
+import schema from './schema';
 
-import startServer from './server';
-import mongoose from 'mongoose';
+const server = new ApolloServer({ schema });
 
-try {
-  const PORT = 8080;
+server.listen({ port: process.env.PORT || 8080, host: process.env.host || '0.0.0.0' }).then(({url}) => {
+  console.log(`🚀 Server ready at ${url}`);
+});
 
-  let server: Server;
-
-  if (module.hot) {
-    module.hot.accept();
-    module.hot.dispose(data => {
-      if (server) {
-        server.close();
-      }
-      data.hotReloaded = true;
-    });
-    module.hot.addStatusHandler(status => {
-      if (status === 'fail') {
-        process.exit(250);
-      }
-    });
-  }
-
-  const firstStartInDevMode =
-    module.hot && process.env.LAST_EXIT_CODE === '0' && (!module.hot.data || !module.hot.data.hotReloaded);
-
-  mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true }).catch(console.error);
-
-  startServer(PORT).then(serverInstance => {
-    if (!module.hot || firstStartInDevMode) {
-      console.log(`GraphQL Server is now running on http://localhost:${PORT}`);
-    }
-
-    server = serverInstance;
-  });
-} catch (e) {
-  console.error(e);
-  process.exit(1);
-}

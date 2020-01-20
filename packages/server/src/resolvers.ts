@@ -1,29 +1,49 @@
-import pokemonModel, { Pokemon } from './models/Pokemon';
+import {Item} from "dynamodb/Model";
+import { Pokemon } from './dynamo_models/Pokemon';
+import dynamoDB from "./dynamo";
+
+
+function dynamoItemToPokemon(item: any) {
+  return {
+    dexNumber: item.dexNumber.N,
+      name: item.name.S,
+      species: item.species.S,
+      sprite: item.sprite.S,
+      primaryType: item.primaryType.S.toUpperCase(),
+      secondaryType: item.secondaryType.NULL ? null : item.secondaryType.S,
+      statistics: {
+      hp: item.statistic_hp.N,
+        attack: item.statistic_attack.N,
+        defense: item.statistic_defense.N,
+        spatk: item.statistic_spatk.N,
+        spdef: item.statistic_spdef.N,
+        speed: item.statistic_speed.N
+    },
+    ability: {
+      name: item.ability_name.S,
+        description: item.ability_description.S,
+    }
+  };
+}
 
 export default {
   Query: {
-    pokemon: async (obj: any, { dexNumber }: { dexNumber: string }) => {
-      const pokemonData = (await pokemonModel.findOne({ dexNumber })) as Pokemon;
-      return {
-        ...pokemonData.toObject(),
-        primaryType: pokemonData.primaryType.toUpperCase(),
-        secondaryType: pokemonData.secondaryType ? pokemonData.secondaryType.toUpperCase() : null,
-        statistics: {
-          hp: pokemonData.statistic_hp,
-          attack: pokemonData.statistic_attack,
-          defense: pokemonData.statistic_defense,
-          spatk: pokemonData.statistic_spatk,
-          spdef: pokemonData.statistic_spdef,
-          speed: pokemonData.statistic_speed
-        },
-        ability: {
-          name: pokemonData.ability_name,
-          description: pokemonData.ability_desc,
-        }
-      };
+    pokemon: async (obj: any, { name }: { name: string }) => {
+      const request = await dynamoDB.getItem({
+        TableName: process.env.DYNAMODB_TABLE,
+        Key: { 'name': { S: name } },
+      }).promise();
+
+      return dynamoItemToPokemon(request.Item);
     },
     pokemons: async () => {
-      return pokemonModel.find();
+      const data = await dynamoDB.scan({TableName: process.env.DYNAMODB_TABLE}).promise();
+      return data.Items.map((item: any) => dynamoItemToPokemon(item)).sort((a, b) => {
+        return a.dexNumber - b.dexNumber;
+      });
+    },
+    test: () => {
+      return 'Hello World !';
     }
   }
 };
